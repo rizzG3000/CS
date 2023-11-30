@@ -7,7 +7,7 @@ import joblib
 # Backend Code: Data Preprocessing and Model Training
 def preprocess_and_train():
     # Load the dataset (replace with your actual file path)
-    real_estate_data = pd.read_excel('/Users/maxgrau/Desktop/CS/real-estate-scraped-data.xlsx')
+    real_estate_data = pd.read_excel('https://github.com/maxg0072/CS/blob/main/real-estate-scraped-data.xlsx')
 
     # Data Preprocessing
     # Define the function to split 'Col3'
