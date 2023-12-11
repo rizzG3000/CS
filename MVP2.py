@@ -156,7 +156,7 @@ rooms = st.selectbox("Select the number of rooms", room_options)
 size_m2 = st.number_input("Enter the size in square meters", min_value=0)
 
 if st.button('Predict Rental Price'):
-    predicted_price = predict_price(size_m2, zip_code, rooms, model)
+    predicted_price = predict_price(size_m2, extracted_zip_code, rooms, model)
     if predicted_price is not None:
         st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
     else:
