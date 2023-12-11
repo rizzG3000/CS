@@ -77,7 +77,7 @@ def extract_zip_code(input_text):
 def predict_price(size_m2, zip_code, rooms, model):
     # Stellen Sie sicher, dass zip_code ein numerischer Wert ist
     try:
-        area_code = int(zip_code)
+        area_code = int(extracted_zip_code)
     except ValueError:
         # Behandlung des Fehlers, falls die Konvertierung nicht möglich ist
         st.error("Bitte geben Sie eine gültige Postleitzahl ein.")
