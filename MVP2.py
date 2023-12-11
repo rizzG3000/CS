@@ -6,10 +6,6 @@ import joblib
 import folium
 from streamlit_folium import folium_static
 from geopy.geocoders import Nominatim
-import googlemaps
-
-# Initialize the Google Maps client with your API key
-gmaps = googlemaps.Client(key='AIzaSyB0T5dtiSOV0k2rowGTvbMXwoCjjWOEH20')  # Replace 'YOUR_API_KEY' with your actual API key
 
 # Backend Code: Data Preprocessing and Model Training
 def preprocess_and_train():
@@ -78,23 +74,12 @@ def predict_price(size_m2, area_code, rooms, model):
     predicted_price = model.predict(input_features)
     return predicted_price[0]
 
-## Function to get latitude and longitude from zip code
-#def get_lat_lon_from_zip(zip_code):
+# Function to get latitude and longitude from zip code
+def get_lat_lon_from_zip(zip_code):
     geolocator = Nominatim(user_agent="http")
     location = geolocator.geocode(zip_code)
     if location:
         return location.latitude, location.longitude
-    else:
-        return None, None
-
-def get_lat_lon_from_zip(zip_code):
-    # Geocode the zip code using Google Maps API
-    geocode_result = gmaps.geocode(zip_code)
-
-    # Check if results were found
-    if geocode_result and len(geocode_result) > 0:
-        location = geocode_result[0]['geometry']['location']
-        return location['lat'], location['lng']
     else:
         return None, None
 
