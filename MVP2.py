@@ -100,6 +100,16 @@ def predict_price(size_m2, extracted_zip_code, rooms, model):
     predicted_price = model.predict(input_features)
     return predicted_price[0]
 
+def extract_zip_from_address(address):
+    geolocator = Nominatim(user_agent="http")
+    location = geolocator.geocode(address)
+    if location:
+        address_components = location.raw.get('display_name', '').split(',')
+        for component in address_components:
+            if component.strip().isdigit() and len(component.strip()) == 4:  # Schweizer PLZ haben 4 Ziffern
+                return component.strip()
+    return None
+
 # Function to get latitude and longitude from zip code
 def get_lat_lon_from_zip(address):
     geolocator = Nominatim(user_agent="http")
@@ -119,7 +129,7 @@ st.title("Rental Price Prediction")
 address_input = st.text_input("Enter an address or zip code:")
 
 # Extrahieren der Postleitzahl aus der Eingabe
-extracted_zip_code = extract_zip_code(address_input)
+extracted_zip_code = extract_zip_from_address(address_input)
 
 
 ## Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
