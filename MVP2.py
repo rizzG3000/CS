@@ -132,20 +132,6 @@ address_input = st.text_input("Enter an address or zip code in St. Gallen:")
 # Extrahieren der Postleitzahl aus der Eingabe
 extracted_zip_code = extract_zip_from_address(address_input)
 
-
-## Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
-##if extracted_zip_code:
-# #   # Display the map based on the extracted zip code
-#    lat, lon = get_lat_lon_from_zip(address_input)
-#    if lat and lon:
-#        map = folium.Map(location=[lat, lon], zoom_start=16)
-#        folium.Marker([lat, lon]).add_to(map)
-#        folium_static(map)
-#    else:
-#        st.write("Invalid zip code or location not found.")
-#else:
-#    st.write("Please enter a valid address or zip code.")
-
 # Display the map based on the address or zip code
 if address_input:
     lat, lon = get_lat_lon_from_zip(address_input)
@@ -156,10 +142,6 @@ if address_input:
     else:
         st.write("Invalid zip code or location not found.")
 
-## Dropdown for area_code
-#area_code_options = [9000, 9001, 9004, 9006, 9007, 9008, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9020, 9021, 9023, 9024, 9026, 9027, 9028, 9029]
-#area_code = st.selectbox("Select the area code", area_code_options)
-
 # Dropdown for rooms
 room_options = list(range(1, 7))  # Creating a list from 1 to 6
 rooms = st.selectbox("Select the number of rooms", room_options)
@@ -167,9 +149,13 @@ rooms = st.selectbox("Select the number of rooms", room_options)
 # Input for size in square meters
 size_m2 = st.number_input("Enter the size in square meters", min_value=0)
 
+# Predict Rental Price button and functionality
 if st.button('Predict Rental Price'):
-    predicted_price = predict_price(size_m2, extracted_zip_code, rooms, model)
-    if predicted_price is not None:
-        st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
+    if extracted_zip_code:
+        predicted_price = predict_price(size_m2, extracted_zip_code, rooms, model)
+        if predicted_price is not None:
+            st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
+        else:
+            st.write("Unable to predict price. Please check your inputs.")
     else:
-        st.write("Preisvorhersage nicht möglich. Überprüfen Sie die eingegebenen Daten.")
+        st.write("Please enter a valid address or zip code in St. Gallen.")
