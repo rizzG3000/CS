@@ -74,12 +74,10 @@ def extract_zip_code(input_text):
             return part
     return None  # Keine gültige Postleitzahl gefunden
 
-def predict_price(size_m2, zip_code, rooms, model):
-    # Stellen Sie sicher, dass zip_code ein numerischer Wert ist
+def predict_price(size_m2, extracted_zip_code, rooms, model):
     try:
         area_code = int(extracted_zip_code)
     except ValueError:
-        # Behandlung des Fehlers, falls die Konvertierung nicht möglich ist
         st.error("Bitte geben Sie eine gültige Postleitzahl ein.")
         return None
 
@@ -137,7 +135,7 @@ else:
     st.write("Please enter a valid address or zip code.")
 
 # Display the map based on the zip code
-if zip_code:
+if extracted_zip_code:
     lat, lon = get_lat_lon_from_zip(zip_code)
     if lat and lon:
         map = folium.Map(location=[lat, lon], zoom_start=16)
