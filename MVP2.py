@@ -64,6 +64,15 @@ def preprocess_and_train():
 
     return model
 
+def extract_zip_code(input_text):
+    # Zerlegen des Strings anhand von Kommata oder Leerzeichen
+    parts = input_text.replace(',', ' ').split()
+
+    # Durchsuchen der Teile nach einer Zahlenfolge
+    for part in parts:
+        if part.isdigit() and len(part) == 4:  # Schweizer Postleitzahlen haben 4 Ziffern
+            return part
+    return None  # Keine gültige Postleitzahl gefunden
 
 def predict_price(size_m2, zip_code, rooms, model):
     # Stellen Sie sicher, dass zip_code ein numerischer Wert ist
@@ -108,8 +117,24 @@ model = preprocess_and_train()
 # Streamlit UI
 st.title("Rental Price Prediction")
 
-# Input for zip code
-zip_code = st.text_input("Enter a zip code:")
+# Input für eine Adresse oder Postleitzahl
+address_input = st.text_input("Enter an address or zip code:")
+
+# Extrahieren der Postleitzahl aus der Eingabe
+extracted_zip_code = extract_zip_code(address_input)
+
+# Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
+if extracted_zip_code:
+    # Display the map based on the extracted zip code
+    lat, lon = get_lat_lon_from_zip(extracted_zip_code)
+    if lat and lon:
+        map = folium.Map(location=[lat, lon], zoom_start=16)
+        folium.Marker([lat, lon]).add_to(map)
+        folium_static(map)
+    else:
+        st.write("Invalid zip code or location not found.")
+else:
+    st.write("Please enter a valid address or zip code.")
 
 # Display the map based on the zip code
 if zip_code:
