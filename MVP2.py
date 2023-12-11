@@ -101,14 +101,14 @@ def predict_price(size_m2, extracted_zip_code, rooms, model):
     return predicted_price[0]
 
 def extract_zip_from_address(address):
+    valid_st_gallen_zip_codes = ['9000', '9001', '9004', '9006', '9007', '9008', '9010', '9011', '9012', '9013', '9014', '9015', '9016', '9020', '9021', '9023', '9024', '9026', '9027', '9028', '9029']
     geolocator = Nominatim(user_agent="http")
-    location = geolocator.geocode(address)
+    location = geolocator.geocode(address + ", St. Gallen", country_codes='CH')
     if location:
-        if "St. Gallen" in location.address:
-            address_components = location.raw.get('display_name', '').split(',')
-            for component in address_components:
-                if component.strip().isdigit() and len(component.strip()) == 4:  # Schweizer PLZ haben 4 Ziffern
-                    return component.strip()
+        address_components = location.raw.get('display_name', '').split(',')
+        for component in address_components:
+            if component.strip() in valid_st_gallen_zip_codes:
+                return component.strip()
     return None
 
 # Function to get latitude and longitude from zip code
