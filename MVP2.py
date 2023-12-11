@@ -96,7 +96,7 @@ zip_code = st.text_input("Enter a zip code:")
 if zip_code:
     lat, lon = get_lat_lon_from_zip(zip_code)
     if lat and lon:
-        map = folium.Map(location=[lat, lon], zoom_start=15)
+        map = folium.Map(location=[lat, lon], zoom_start=16)
         folium.Marker([lat, lon]).add_to(map)
         folium_static(map)
     else:
