@@ -76,7 +76,7 @@ def predict_price(size_m2, area_code, rooms, model):
 
 # Function to get latitude and longitude from zip code
 def get_lat_lon_from_zip(zip_code):
-    geolocator = Nominatim(user_agent="geoapiExercises")
+    geolocator = Nominatim(user_agent="http")
     location = geolocator.geocode(zip_code)
     if location:
         return location.latitude, location.longitude
