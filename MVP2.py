@@ -6,7 +6,6 @@ import joblib
 import folium
 from streamlit_folium import folium_static
 from geopy.geocoders import Nominatim
-import openpyxl
 
 # Backend Code: Data Preprocessing and Model Training
 def preprocess_and_train():
