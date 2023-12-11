@@ -101,9 +101,9 @@ def predict_price(size_m2, extracted_zip_code, rooms, model):
     return predicted_price[0]
 
 # Function to get latitude and longitude from zip code
-def get_lat_lon_from_zip(zip_code):
+def get_lat_lon_from_zip(address):
     geolocator = Nominatim(user_agent="http")
-    location = geolocator.geocode(zip_code)
+    location = geolocator.geocode(address)
     if location:
         return location.latitude, location.longitude
     else:
@@ -121,10 +121,11 @@ address_input = st.text_input("Enter an address or zip code:")
 # Extrahieren der Postleitzahl aus der Eingabe
 extracted_zip_code = extract_zip_code(address_input)
 
+
 # Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
 if extracted_zip_code:
     # Display the map based on the extracted zip code
-    lat, lon = get_lat_lon_from_zip(extracted_zip_code)
+    lat, lon = get_lat_lon_from_zip(address_input)
     if lat and lon:
         map = folium.Map(location=[lat, lon], zoom_start=16)
         folium.Marker([lat, lon]).add_to(map)
