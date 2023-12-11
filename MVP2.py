@@ -104,10 +104,11 @@ def extract_zip_from_address(address):
     geolocator = Nominatim(user_agent="http")
     location = geolocator.geocode(address)
     if location:
-        address_components = location.raw.get('display_name', '').split(',')
-        for component in address_components:
-            if component.strip().isdigit() and len(component.strip()) == 4:  # Schweizer PLZ haben 4 Ziffern
-                return component.strip()
+        if "St. Gallen" in location.address:
+            address_components = location.raw.get('display_name', '').split(',')
+            for component in address_components:
+                if component.strip().isdigit() and len(component.strip()) == 4:  # Schweizer PLZ haben 4 Ziffern
+                    return component.strip()
     return None
 
 # Function to get latitude and longitude from zip code
@@ -126,7 +127,7 @@ model = preprocess_and_train()
 st.title("Rental Price Prediction")
 
 # Input für eine Adresse oder Postleitzahl
-address_input = st.text_input("Enter an address or zip code:")
+address_input = st.text_input("Enter an address or zip code in St. Gallen:")
 
 # Extrahieren der Postleitzahl aus der Eingabe
 extracted_zip_code = extract_zip_from_address(address_input)
