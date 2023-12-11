@@ -3,6 +3,9 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import joblib
+import folium
+from streamlit_folium import folium_static
+from geopy.geocoders import Nominatim
 
 # Backend Code: Data Preprocessing and Model Training
 def preprocess_and_train():
@@ -66,10 +69,19 @@ def predict_price(size_m2, area_code, rooms, model):
     input_features = pd.DataFrame({
         'Rooms': [rooms],
         'Size_m2': [size_m2],
-        'area_code': [area_code]
+        'area_code': [zip_code]
     })
     predicted_price = model.predict(input_features)
     return predicted_price[0]
+
+# Function to get latitude and longitude from zip code
+def get_lat_lon_from_zip(zip_code):
+    geolocator = Nominatim(user_agent="geoapiExercises")
+    location = geolocator.geocode(zip_code)
+    if location:
+        return location.latitude, location.longitude
+    else:
+        return None, None
 
 # Preprocess data and train the model
 model = preprocess_and_train()
@@ -77,9 +89,22 @@ model = preprocess_and_train()
 # Streamlit UI
 st.title("Rental Price Prediction")
 
-# Dropdown for area_code
-area_code_options = [9000, 9001, 9004, 9006, 9007, 9008, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9020, 9021, 9023, 9024, 9026, 9027, 9028, 9029]
-area_code = st.selectbox("Select the area code", area_code_options)
+# Input for zip code
+zip_code = st.text_input("Enter a zip code:")
+
+# Display the map based on the zip code
+if zip_code:
+    lat, lon = get_lat_lon_from_zip(zip_code)
+    if lat and lon:
+        map = folium.Map(location=[lat, lon], zoom_start=12)
+        folium.Marker([lat, lon]).add_to(map)
+        folium_static(map)
+    else:
+        st.write("Invalid zip code or location not found.")
+
+## Dropdown for area_code
+#area_code_options = [9000, 9001, 9004, 9006, 9007, 9008, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9020, 9021, 9023, 9024, 9026, 9027, 9028, 9029]
+#area_code = st.selectbox("Select the area code", area_code_options)
 
 # Dropdown for rooms
 room_options = list(range(1, 7))  # Creating a list from 1 to 6
@@ -89,5 +114,5 @@ rooms = st.selectbox("Select the number of rooms", room_options)
 size_m2 = st.number_input("Enter the size in square meters", min_value=0)
 
 if st.button('Predict Rental Price'):
-    predicted_price = predict_price(size_m2, area_code, rooms, model)
+    predicted_price = predict_price(size_m2, zip_code, rooms, model)
     st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
