@@ -134,7 +134,7 @@ if extracted_zip_code:
 else:
     st.write("Please enter a valid address or zip code.")
 
-# Display the map based on the zip code
+# Display the map based on the address or zip code
 if extracted_zip_code:
     lat, lon = get_lat_lon_from_zip(zip_code)
     if lat and lon:
