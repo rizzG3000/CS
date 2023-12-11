@@ -122,22 +122,22 @@ address_input = st.text_input("Enter an address or zip code:")
 extracted_zip_code = extract_zip_code(address_input)
 
 
-# Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
-if extracted_zip_code:
-    # Display the map based on the extracted zip code
-    lat, lon = get_lat_lon_from_zip(address_input)
-    if lat and lon:
-        map = folium.Map(location=[lat, lon], zoom_start=16)
-        folium.Marker([lat, lon]).add_to(map)
-        folium_static(map)
-    else:
-        st.write("Invalid zip code or location not found.")
-else:
-    st.write("Please enter a valid address or zip code.")
+## Überprüfen Sie, ob eine gültige Postleitzahl extrahiert wurde
+##if extracted_zip_code:
+# #   # Display the map based on the extracted zip code
+#    lat, lon = get_lat_lon_from_zip(address_input)
+#    if lat and lon:
+#        map = folium.Map(location=[lat, lon], zoom_start=16)
+#        folium.Marker([lat, lon]).add_to(map)
+#        folium_static(map)
+#    else:
+#        st.write("Invalid zip code or location not found.")
+#else:
+#    st.write("Please enter a valid address or zip code.")
 
 # Display the map based on the address or zip code
-if extracted_zip_code:
-    lat, lon = get_lat_lon_from_zip(zip_code)
+if address_input:
+    lat, lon = get_lat_lon_from_zip(address_input)
     if lat and lon:
         map = folium.Map(location=[lat, lon], zoom_start=16)
         folium.Marker([lat, lon]).add_to(map)
