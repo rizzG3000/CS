@@ -64,8 +64,27 @@ def preprocess_and_train():
 
     return model
 
-# Function to predict the price based on the model
-def predict_price(size_m2, area_code, rooms, model):
+
+def predict_price(size_m2, zip_code, rooms, model):
+    # Stellen Sie sicher, dass zip_code ein numerischer Wert ist
+    try:
+        area_code = int(zip_code)
+    except ValueError:
+        # Behandlung des Fehlers, falls die Konvertierung nicht möglich ist
+        st.error("Bitte geben Sie eine gültige Postleitzahl ein.")
+        return None
+
+    input_features = pd.DataFrame({
+        'Rooms': [rooms],
+        'Size_m2': [size_m2],
+        'area_code': [area_code]  # Verwenden Sie hier den konvertierten numerischen Wert
+    })
+    predicted_price = model.predict(input_features)
+    return predicted_price[0]
+
+
+## Function to predict the price based on the model
+#def predict_price(size_m2, area_code, rooms, model):
     input_features = pd.DataFrame({
         'Rooms': [rooms],
         'Size_m2': [size_m2],
