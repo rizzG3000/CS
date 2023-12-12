@@ -102,7 +102,7 @@ def predict_price(size_m2, extracted_zip_code, rooms, model):
 
 def extract_zip_from_address(address):
     valid_st_gallen_zip_codes = ['9000', '9001', '9004', '9006', '9007', '9008', '9010', '9011', '9012', '9013', '9014', '9015', '9016', '9020', '9021', '9023', '9024', '9026', '9027', '9028', '9029']
-    geolocator = Nominatim(user_agent="http")
+    geolocator = Nominatim(user_agent="https")
     location = geolocator.geocode(address + ", St. Gallen", country_codes='CH')
     if location:
         address_components = location.raw.get('display_name', '').split(',')
@@ -132,8 +132,9 @@ address_input = st.text_input("Enter an address or zip code in St. Gallen:")
 # Extrahieren der Postleitzahl aus der Eingabe
 extracted_zip_code = extract_zip_from_address(address_input)
 
-# Display the map based on the address or zip code
+# Wenn eine gültige Postleitzahl extrahiert wurde, Karte und Vorhersagefunktionalität anzeigen
 if extracted_zip_code:
+    # Karte anzeigen
     lat, lon = get_lat_lon_from_zip(address_input)
     if lat and lon:
         map = folium.Map(location=[lat, lon], zoom_start=16)
@@ -142,20 +143,19 @@ if extracted_zip_code:
     else:
         st.write("Invalid zip code or location not found.")
 
-# Dropdown for rooms
-room_options = list(range(1, 7))  # Creating a list from 1 to 6
-rooms = st.selectbox("Select the number of rooms", room_options)
+    # Dropdown für Zimmer und Eingabe für Quadratmeter
+    room_options = list(range(1, 7))  # Liste von 1 bis 6
+    rooms = st.selectbox("Select the number of rooms", room_options)
+    size_m2 = st.number_input("Enter the size in square meters", min_value=0)
 
-# Input for size in square meters
-size_m2 = st.number_input("Enter the size in square meters", min_value=0)
-
-# Predict Rental Price button and functionality
-if st.button('Predict Rental Price'):
-    if extracted_zip_code:
+    # Vorhersagefunktionalität
+    if st.button('Predict Rental Price'):
         predicted_price = predict_price(size_m2, extracted_zip_code, rooms, model)
         if predicted_price is not None:
             st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
         else:
             st.write("Unable to predict price. Please check your inputs.")
-    else:
+else:
+    # Meldung anzeigen, wenn die Adresse nicht gültig ist
+    if address_input:
         st.write("Please enter a valid address or zip code in St. Gallen.")
