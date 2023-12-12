@@ -2,18 +2,10 @@ import streamlit as st
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+import joblib
 import folium
 from streamlit_folium import folium_static
 from geopy.geocoders import Nominatim
-
-# Funktion, um ähnliche Immobilien zu finden
-def find_similar_properties(input_zip, input_rooms, input_size, data, threshold=10):
-    similar_properties = data[
-        (data['area_code'] == input_zip) &
-        (data['Rooms'].between(input_rooms - 1, input_rooms + 1)) &
-        (data['Size_m2'].between(input_size - threshold, input_size + threshold))
-    ]
-    return similar_properties
 
 # Backend Code: Data Preprocessing and Model Training
 def preprocess_and_train():
@@ -70,20 +62,18 @@ def preprocess_and_train():
     model = LinearRegression()
     model.fit(X_train, y_train)
 
-    return model, real_estate_data
+    return model
 
-# Extraktion der Postleitzahl
-def extract_zip_from_address(address):
-    geolocator = Nominatim(user_agent="http")
-    location = geolocator.geocode(address + ", St. Gallen", country_codes='CH')
-    if location:
-        address_components = location.raw.get('display_name', '').split(',')
-        for component in address_components:
-            if component.isdigit() and len(component) == 4:
-                return component
-    return None
+def extract_zip_code(input_text):
+    # Zerlegen des Strings anhand von Kommata oder Leerzeichen
+    parts = input_text.replace(',', ' ').split()
 
-# Funktion zur Preisvorhersage
+    # Durchsuchen der Teile nach einer Zahlenfolge
+    for part in parts:
+        if part.isdigit() and len(part) == 4:  # Schweizer Postleitzahlen haben 4 Ziffern
+            return part
+    return None  # Keine gültige Postleitzahl gefunden
+
 def predict_price(size_m2, extracted_zip_code, rooms, model):
     try:
         area_code = int(extracted_zip_code)
@@ -94,25 +84,69 @@ def predict_price(size_m2, extracted_zip_code, rooms, model):
     input_features = pd.DataFrame({
         'Rooms': [rooms],
         'Size_m2': [size_m2],
-        'area_code': [area_code]
+        'area_code': [area_code]  # Verwenden Sie hier den konvertierten numerischen Wert
     })
     predicted_price = model.predict(input_features)
     return predicted_price[0]
 
+
+## Function to predict the price based on the model
+#def predict_price(size_m2, area_code, rooms, model):
+    input_features = pd.DataFrame({
+        'Rooms': [rooms],
+        'Size_m2': [size_m2],
+        'area_code': [zip_code]
+    })
+    predicted_price = model.predict(input_features)
+    return predicted_price[0]
+
+def extract_zip_from_address(address):
+    valid_st_gallen_zip_codes = ['9000', '9001', '9004', '9006', '9007', '9008', '9010', '9011', '9012', '9013', '9014', '9015', '9016', '9020', '9021', '9023', '9024', '9026', '9027', '9028', '9029']
+    geolocator = Nominatim(user_agent="http")
+    location = geolocator.geocode(address + ", St. Gallen", country_codes='CH')
+    if location:
+        address_components = location.raw.get('display_name', '').split(',')
+        for component in address_components:
+            if component.strip() in valid_st_gallen_zip_codes:
+                return component.strip()
+    return None
+
+# Function to get latitude and longitude from zip code
+def get_lat_lon_from_zip(address):
+    geolocator = Nominatim(user_agent="http")
+    location = geolocator.geocode(address)
+    if location:
+        return location.latitude, location.longitude
+    else:
+        return None, None
+
+# Preprocess data and train the model
+model = preprocess_and_train()
+
 # Streamlit UI
 st.title("Rental Price Prediction")
 
-# Modell und Daten laden
-model, real_estate_data = preprocess_and_train()
-
-# Input für Adresse oder Postleitzahl
+# Input für eine Adresse oder Postleitzahl
 address_input = st.text_input("Enter an address or zip code in St. Gallen:")
 
 # Extrahieren der Postleitzahl aus der Eingabe
 extracted_zip_code = extract_zip_from_address(address_input)
 
-# Input für die Anzahl der Zimmer und Größe in Quadratmetern
-rooms = st.number_input("Enter the number of rooms", min_value=1, max_value=10)
+# Display the map based on the address or zip code
+if address_input:
+    lat, lon = get_lat_lon_from_zip(address_input)
+    if lat and lon:
+        map = folium.Map(location=[lat, lon], zoom_start=16)
+        folium.Marker([lat, lon]).add_to(map)
+        folium_static(map)
+    else:
+        st.write("Invalid zip code or location not found.")
+
+# Dropdown for rooms
+room_options = list(range(1, 7))  # Creating a list from 1 to 6
+rooms = st.selectbox("Select the number of rooms", room_options)
+
+# Input for size in square meters
 size_m2 = st.number_input("Enter the size in square meters", min_value=0)
 
 # Predict Rental Price button and functionality
@@ -121,14 +155,6 @@ if st.button('Predict Rental Price'):
         predicted_price = predict_price(size_m2, extracted_zip_code, rooms, model)
         if predicted_price is not None:
             st.write(f"The predicted price for the apartment is CHF {predicted_price:.2f}")
-
-            # Ähnliche Immobilien finden und anzeigen
-            similar_properties = find_similar_properties(extracted_zip_code, rooms, size_m2, real_estate_data)
-            if not similar_properties.empty:
-                st.write("Ähnliche Immobilien:")
-                st.dataframe(similar_properties[['Property_Type', 'Rooms', 'Size_m2', 'area_code']])
-            else:
-                st.write("Keine ähnlichen Immobilien gefunden.")
         else:
             st.write("Unable to predict price. Please check your inputs.")
     else:
