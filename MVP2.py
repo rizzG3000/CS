@@ -133,7 +133,7 @@ address_input = st.text_input("Enter an address or zip code in St. Gallen:")
 extracted_zip_code = extract_zip_from_address(address_input)
 
 # Display the map based on the address or zip code
-if address_input:
+if extracted_zip_code:
     lat, lon = get_lat_lon_from_zip(address_input)
     if lat and lon:
         map = folium.Map(location=[lat, lon], zoom_start=16)
