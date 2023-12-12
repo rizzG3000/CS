@@ -75,17 +75,13 @@ def preprocess_and_train():
 # Extraktion der Postleitzahl
 def extract_zip_from_address(address):
     geolocator = Nominatim(user_agent="http")
-    try:
-        location = geolocator.geocode(address, country_codes='CH')
-        if location:
-            # Extrahieren der Postleitzahl direkt aus den Geodaten
-            zip_code = location.raw.get('address', {}).get('postcode', None)
-            if zip_code and len(zip_code) == 4:  # Schweizer Postleitzahlen haben 4 Ziffern
-                return zip_code
-    except Exception as e:
-        st.error(f"Geocoding error: {e}")
+    location = geolocator.geocode(address + ", St. Gallen", country_codes='CH')
+    if location:
+        address_components = location.raw.get('display_name', '').split(',')
+        for component in address_components:
+            if component.isdigit() and len(component) == 4:
+                return component
     return None
-
 
 # Funktion zur Preisvorhersage
 def predict_price(size_m2, extracted_zip_code, rooms, model):
